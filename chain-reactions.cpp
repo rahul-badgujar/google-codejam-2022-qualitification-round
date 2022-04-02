@@ -4,7 +4,7 @@
 #include <vector>
 #define FLIMIT 1000000000
 #define test 1
-#define int unsigned long long int
+#define int long long int
 using namespace std;
 
 using vi = vector<int>;
@@ -70,10 +70,10 @@ class Solution {
         auto& existingGateOfU = gates[u];
         if (newGateForU < existingGateOfU) {
             existingGateOfU = newGateForU;
+            maxTill = max(maxTill, fun[u]);
+            int v = points[u];
+            setAlloweds(v, initiator, maxTill);
         }
-        maxTill = max(maxTill, fun[u]);
-        int v = points[u];
-        setAlloweds(v, initiator, maxTill);
     }
 
     int maxVal(const int& u, const int& initiator, int maxTill) {
@@ -83,9 +83,8 @@ class Solution {
             int v = points[u];
             maxTill = max(maxTill, fun[u]);
             return maxVal(v, initiator, maxTill);
-        } else {
-            return maxTill;
         }
+        return maxTill;
     }
 };
 
