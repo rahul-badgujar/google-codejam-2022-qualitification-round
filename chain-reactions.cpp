@@ -2,18 +2,32 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#define FLIMIT 1000000000
+#define test 1
+#define int unsigned long long int
 using namespace std;
 
 using vi = vector<int>;
 
 class Solution {
    public:
+    class Gate {
+       public:
+        int minMaxTill;
+        int initiator;
+        Gate() : Gate(FLIMIT + 1, -1) {}
+        Gate(int _minMaxTill, int _initiator) : minMaxTill(_minMaxTill), initiator(_initiator) {}
+        friend bool operator<(const Gate& g1, const Gate& g2) {
+            return g1.minMaxTill < g2.minMaxTill;
+        }
+    };
+
     int n;
     vi fun;
     vi points;
     vi indegree;
     vi initiators;
-    map<int, pair<int, int>> allowed;
+    vector<Gate> gates;
 
     Solution(int _n) : n(_n) {
         init();
@@ -24,7 +38,8 @@ class Solution {
         fun.resize(n + 1);
         points.resize(n + 1);
         indegree.resize(n + 1, 0);
-        fun[0] = 0, points[0] = -1;
+        gates.resize(n + 1, Gate());
+        // fun[0] = 0, points[0] = -1;
         for (int i = 1; i <= n; ++i) {
             cin >> fun[i];
         }
@@ -50,28 +65,22 @@ class Solution {
     }
 
     void setAlloweds(const int& u, const int& initiator, int maxTill) {
-        if (allowed.find(u) == allowed.end()) {
-            allowed[u] = {maxTill, initiator};
-        } else {
-            auto& allowedVal = allowed[u];
-            if (maxTill < allowedVal.first) {
-                allowedVal = {maxTill, initiator};
-            } else {
-                return;
-            }
+        if (u < 1) return;
+        Gate newGateForU = Gate(maxTill, initiator);
+        auto& existingGateOfU = gates[u];
+        if (newGateForU < existingGateOfU) {
+            existingGateOfU = newGateForU;
         }
         maxTill = max(maxTill, fun[u]);
         int v = points[u];
-        if (v != -1) {
-            setAlloweds(v, initiator, maxTill);
-        }
+        setAlloweds(v, initiator, maxTill);
     }
 
     int maxVal(const int& u, const int& initiator, int maxTill) {
-        const auto& allowedVal = allowed[u];
-        if (allowedVal.second == initiator) {
+        if (u < 1) return maxTill;
+        const auto& gateOfU = gates[u];
+        if (gateOfU.initiator == initiator) {
             int v = points[u];
-            if (v == -1) return maxTill;
             maxTill = max(maxTill, fun[u]);
             return maxVal(v, initiator, maxTill);
         } else {
@@ -80,7 +89,11 @@ class Solution {
     }
 };
 
-int main() {
+int32_t main() {
+    if (test) {
+        freopen("input.txt", "r", stdin);
+        freopen("output.txt", "w", stdout);
+    }
     int T;
     cin >> T;
     for (int t = 1; t <= T; ++t) {
